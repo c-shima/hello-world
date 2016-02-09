@@ -28,13 +28,11 @@ public class AtypeReadfile {
 
 
 	public static void main(String[] args){
-
 		String temporaryStr; int errorMode = 0;
-
+		
 		/*支店定義ファイルの呼び出し
 		 *
 		 */
-
 		System.out.println("指定されたファイルを探しています・・・");
 		HashMap<String,String> branchName = new HashMap<String,String>();
 		HashMap<String,Integer> branchSales = new HashMap<String,Integer>();
@@ -98,7 +96,6 @@ public class AtypeReadfile {
 		/*売上ファイルの呼び出し
 		 *
 		*/
-
 		File salesDir = new File(args[2]);
 		String[] salesDirList = salesDir.list();
 		ArrayList<String> salesFilesSort = new ArrayList<String>();
@@ -135,7 +132,6 @@ public class AtypeReadfile {
 		 *
 		 */
 
-
 		String [] temporaryDStr = new String[3];
 		for (int i = 0; i < salesFilesSort.size(); i++){
 			try {
@@ -150,26 +146,19 @@ public class AtypeReadfile {
 					}
 					switch(whileCnt){
 					case 0:
-						if (branchName.get(temporaryStr) == null){
+					case 1:
+						if (branchName.get(temporaryStr) == null && whileCnt == 0){
 							System.out.println( salesDefine+"の支店コードが不正です。\r\n処理を終了します。");
 							return;}
-						temporaryDStr[whileCnt] = temporaryStr;
-						break;
-					case 1:
-						if (commodityName.get(temporaryStr) == null){
+						if (commodityName.get(temporaryStr) == null && whileCnt == 1 ){
 							System.out.println( salesDefine+"の商品コードが不正です。\r\n処理を終了します。");
 							return;	}
 						temporaryDStr[whileCnt] = temporaryStr;
 						break;
 					case 2:
-						
 						branchSales.put( temporaryDStr[0] , branchSales.get(temporaryDStr[0]) + Integer.parseInt(temporaryStr));
 						commoditySales.put( temporaryDStr[1] , commoditySales.get(temporaryDStr[1]) + Integer.parseInt(temporaryStr));
-						if (branchSales.get(temporaryDStr[0]) > 999999999){
-							System.out.println("合計金額が10桁を超えました\r\n処理を終了します。");
-							return;
-						}
-						if (commoditySales.get(temporaryDStr[1]) > 999999999){
+						if (branchSales.get(temporaryDStr[0]) > 999999999 || commoditySales.get(temporaryDStr[1]) > 999999999){
 							System.out.println("合計金額が10桁を超えました\r\n処理を終了します。");
 							return;
 						}
@@ -185,13 +174,13 @@ public class AtypeReadfile {
 				e.printStackTrace();
 			}
 		}
-		
-		
+
+
 		System.out.println("出力中・・・");
 		/*
 		 * 合計金額を降順にソート
 		 */
-		
+
 		List<Map.Entry<String,Integer>> branchEntries = new ArrayList<Map.Entry<String,Integer>>(branchSales.entrySet());
 	    Collections.sort(branchEntries, new Comparator<Map.Entry<String,Integer>>() {
 	        public int compare(Entry<String,Integer> entry1, Entry<String,Integer> entry2) {
@@ -204,17 +193,19 @@ public class AtypeReadfile {
 	                return ((Integer)entry2.getValue()).compareTo((Integer)entry1.getValue());
 	            }
 	        });
-	    
-	    /*
-	     * branch.out に出力
+
+	    /* branch.out に出力
+	     * commodity.out に出力
 	     */
-	    
+
 		File branchRank = new File(args[3]+"\\branch.out");
 		try {
 			FileWriter branchOutputStock = new FileWriter(branchRank);
 			BufferedWriter branchRankOutput = new BufferedWriter(branchOutputStock);
 			 for (Entry<String,Integer> s : branchEntries){
-				 branchRankOutput.write(s.getKey()+","+branchName.get(s.getKey())+","+s.getValue()+"\r\n");
+				 if (s.getValue() != 0){
+					 branchRankOutput.write(s.getKey()+","+branchName.get(s.getKey())+","+s.getValue()+"\r\n");
+				 }
 			}
 			branchRankOutput.close();
 		} catch (IOException e) {
@@ -225,7 +216,9 @@ public class AtypeReadfile {
 			FileWriter commodityOutputStock = new FileWriter(commodityRank);
 			BufferedWriter commodityRankOutput = new BufferedWriter(commodityOutputStock);
 			for (Entry<String,Integer> s : commodityEntries){
-				commodityRankOutput.write(s.getKey()+","+commodityName.get(s.getKey())+","+s.getValue()+"\r\n");
+				if (s.getValue() != 0){
+					commodityRankOutput.write(s.getKey()+","+commodityName.get(s.getKey())+","+s.getValue()+"\r\n");
+				}
 			}
 			commodityRankOutput.close();
 		} catch (IOException e) {
