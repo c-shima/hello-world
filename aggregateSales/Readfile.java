@@ -32,10 +32,8 @@ public class Readfile {
 
 		System.out.println("指定されたファイルを探しています・・・");
 		File branchDefine = new File(args[0]);
-
 		String[] branchTitle = new String[999];
 		int[] branchSales = new int[999];
-
 		if(!branchDefine.exists()){
 			System.out.println("支店定義ファイルが存在しません。");
 			System.out.println("処理を終了します。");
@@ -55,8 +53,7 @@ public class Readfile {
 			}
 			branchStocker.close();
 			if (errorMode > 0) {
-				System.out.println("支店定義ファイルのフォーマットが不正です\r\n"
-					+ "処理を終了します。");
+				System.out.println("支店定義ファイルのフォーマットが不正です\r\n処理を終了します。");
 				return;
 			}
 		} catch (IOException e) {
@@ -68,14 +65,11 @@ public class Readfile {
 		 */
 
 		File commodityDefine = new File(args[1]);
-
 		String[] commodityInfoNo = new String[999];
 		String[] commodityTitle = new String[999];
 		int[] commoditySales = new int[999];
-
 		if(!commodityDefine.exists()){
-			System.out.println("商品定義ファイルが存在しません。");
-			System.out.println("処理を終了します。");
+			System.out.println("商品定義ファイルが存在しません。\r\n処理を終了します。");
 			return;
 		}
 		try {
@@ -94,8 +88,7 @@ public class Readfile {
 			}
 			commodityStocker.close();
 			if (errorMode > 0) {
-				System.out.println("商品定義ファイルのフォーマットが不正です\r\n"
-					+ "処理を終了します。");
+				System.out.println("商品定義ファイルのフォーマットが不正です\r\n処理を終了します。");
 				return;
 			}
 		} catch (IOException e) {
@@ -136,8 +129,7 @@ public class Readfile {
 				if (nowNo == Integer.parseInt(fileSortNoCheck[0])){
 					nowNo++;
 				} else {
-					System.out.println("売上ファイル名が連番になっていません。\r\n"
-							+ "処理を終了します。");
+					System.out.println("売上ファイル名が連番になっていません。\r\n処理を終了します。");
 					return;
 				}
 			}
@@ -150,9 +142,8 @@ public class Readfile {
 
 
 
-			//System.out.println(SalesDefine);
-			String [][] temporaryDisposeStr = new String[salesFilesSort.size()][3];
-			for (int a = 0; a < salesFilesSort.size(); a++){
+		String [][] temporaryDisposeStr = new String[salesFilesSort.size()][3];
+		for (int a = 0; a < salesFilesSort.size(); a++){
 			try {
 				int whileCnt = 0;
 				File salesDefine = new File(args[2]+"\\"+salesFilesSort.get(a));
@@ -160,8 +151,7 @@ public class Readfile {
 				BufferedReader salesInfo = new BufferedReader(salesBranchCheck);
 				while((temporaryStr = salesInfo.readLine()) != null){
 					if (whileCnt ==3 ) {
-						System.out.println(salesDefine+"のフォーマットが不正です。\r\n"
-								+ "処理を終了します。");
+						System.out.println(salesDefine+"のフォーマットが不正です。\r\n処理を終了します。");
 						return;
 					}
 					temporaryDisposeStr[a][whileCnt] = temporaryStr;
@@ -172,102 +162,94 @@ public class Readfile {
 				}
 			} catch (IOException e) {
 				System.out.println(e);
-					// TODO 自動生成された catch ブロック
-					e.printStackTrace();
-				}
+				e.printStackTrace();
 			}
-			int nowBranch = 0;
-			int nowCommodity = 0;
-				for (int i = 0; i < salesFilesSort.size(); i++){
-					/////////////////////////////////////////////////////////
-						nowBranch = Integer.parseInt(temporaryDisposeStr[i][0]);
-						if (branchTitle[nowBranch] == null) {
-							System.out.println(temporaryDisposeStr[i][0] +"の支店コードが不正です。\r\n"
-									+ "処理を終了します。");
-							return;
-						}
-					////////////////////////////////////////////////////////////////
-						for (int b=0; b < commodityInfoNo.length; b++){
-							if (temporaryDisposeStr[i][1].equals(commodityInfoNo[b])){
-								nowCommodity = b;
-								break;
-							}
-							if (b+1 == commodityInfoNo.length ) {
-								System.out.println(temporaryDisposeStr[i][1] +"の商品コードが不正です。\r\n"
-										+ "処理を終了します。");
-								return;
-							}
-						}
-					////////////////////////////////////////////////////////////////////
-						branchSales[nowBranch] += Integer.parseInt(temporaryDisposeStr[i][2]);
-						commoditySales[nowCommodity] += Integer.parseInt(temporaryDisposeStr[i][2]);
-					////////////////////////////////////////////////////////////////////////
+		}
+		int nowBranch = 0;
+		int nowCommodity = 0;
+		for (int i = 0; i < salesFilesSort.size(); i++){
+			/////////////////////////////////////////////////////////
+			nowBranch = Integer.parseInt(temporaryDisposeStr[i][0]);
+			if (branchTitle[nowBranch] == null) {
+				System.out.println(temporaryDisposeStr[i][0] +"の支店コードが不正です。\r\n処理を終了します。");
+				return;
+			}
+			////////////////////////////////////////////////////////////////
+			for (int b=0; b < commodityInfoNo.length; b++){
+				if (temporaryDisposeStr[i][1].equals(commodityInfoNo[b])){
+					nowCommodity = b;
+					break;
 				}
-			int[] alreadyBranchWrite = new int[999]; // 0 == off , 1 == on
-			int[] alreadyCommodityWrite = new int[999]; // 0 == off , 1 == on
-			ArrayList<Integer> salesBranchRank = new ArrayList<Integer>();
-			ArrayList<Integer> salesCommodityRank = new ArrayList<Integer>();
-			for (int c= 0; c < branchSales.length; c++){
-				if (branchSales[c] == 0){continue;}
-				if (branchSales[c] > 999999999){
-					System.out.println("合計金額が10桁を超えました\r\n"
-							+ "処理を終了します。");
+				if (b+1 == commodityInfoNo.length ) {
+					System.out.println(temporaryDisposeStr[i][1] +"の商品コードが不正です。\r\n処理を終了します。");
 					return;
 				}
-				branchSales[c] *= -1;
-				salesBranchRank.add(branchSales[c]);
 			}
-			Collections.sort(salesBranchRank);
-			File branchRank = new File(args[3]+"\\branch.out");
-			try {
-				FileWriter branchOutputStock = new FileWriter(branchRank);
-				BufferedWriter branchRankOutput = new BufferedWriter(branchOutputStock);
-				for (int d = 0; d < salesBranchRank.size(); d++){
-					for (int f = 0; f < branchSales.length; f++){
-						int temporaryInt = salesBranchRank.get(d);
-						if (branchSales[f] == temporaryInt && alreadyBranchWrite[f] == 0){
-							temporaryStr = String.valueOf(f);
-							temporaryInt *= -1;
-							if (temporaryStr.length() == 2 ){	temporaryStr = "0"+temporaryStr;}
-							if (temporaryStr.length() == 1 ){	temporaryStr = "00"+temporaryStr;}
-							branchRankOutput.write(temporaryStr+","+branchTitle[f]+","+temporaryInt+"\r\n");
-							alreadyBranchWrite[f] = 1;
-						}
-					}
-				}
-				branchRankOutput.close();
-			} catch (IOException e) {
-				// TODO 自動生成された catch ブロック
-				e.printStackTrace();
-			}
-
-			for (int c= 0; c < commoditySales.length; c++){
-				if (commoditySales[c] == 0){continue;}
-				commoditySales[c] *= -1;
-				salesCommodityRank.add(commoditySales[c]);
-			}
-			Collections.sort(salesCommodityRank);
-			File commodityRank = new File(args[3]+"\\commodity.out");
-			try {
-				FileWriter commodityOutputStock = new FileWriter(commodityRank);
-				BufferedWriter commodityRankOutput = new BufferedWriter(commodityOutputStock);
-				for (int d = 0; d < salesCommodityRank.size(); d++){
-					for (int f = 0; f < commoditySales.length; f++){
-						int temporaryInt = salesCommodityRank.get(d);
-						if (commoditySales[f] == temporaryInt && alreadyCommodityWrite[f] == 0){
-							temporaryInt *= -1;
-							commodityRankOutput.write(commodityInfoNo[f]+","+commodityTitle[f]+","+temporaryInt+"\r\n");
-							alreadyCommodityWrite[f] = 1;
-						}
-					}
-				}
-				commodityRankOutput.close();
-			} catch (IOException e) {
-				// TODO 自動生成された catch ブロック
-				e.printStackTrace();
-			}
-			System.out.println("正常にファイルを出力しました。\r\n"
-					+ "処理を終了します。");
-			return;
+			////////////////////////////////////////////////////////////////////
+			branchSales[nowBranch] += Integer.parseInt(temporaryDisposeStr[i][2]);
+			commoditySales[nowCommodity] += Integer.parseInt(temporaryDisposeStr[i][2]);
+			////////////////////////////////////////////////////////////////////////
 		}
+		int[] alreadyBranchWrite = new int[999]; // 0 == off , 1 == on
+		int[] alreadyCommodityWrite = new int[999]; // 0 == off , 1 == on
+		ArrayList<Integer> salesBranchRank = new ArrayList<Integer>();
+		ArrayList<Integer> salesCommodityRank = new ArrayList<Integer>();
+		for (int c= 0; c < branchSales.length; c++){
+			if (branchSales[c] == 0){continue;}
+			if (branchSales[c] > 999999999){
+				System.out.println("合計金額が10桁を超えました\r\n処理を終了します。");
+				return;
+			}
+			branchSales[c] *= -1;
+			salesBranchRank.add(branchSales[c]);
+		}
+		Collections.sort(salesBranchRank);
+		File branchRank = new File(args[3]+"\\branch.out");
+		try {
+			FileWriter branchOutputStock = new FileWriter(branchRank);
+			BufferedWriter branchRankOutput = new BufferedWriter(branchOutputStock);
+			for (int d = 0; d < salesBranchRank.size(); d++){
+				for (int f = 0; f < branchSales.length; f++){
+					int temporaryInt = salesBranchRank.get(d);
+					if (branchSales[f] == temporaryInt && alreadyBranchWrite[f] == 0){
+						temporaryStr = String.valueOf(f);
+						temporaryInt *= -1;
+						if (temporaryStr.length() == 2 ){	temporaryStr = "0"+temporaryStr;}
+						if (temporaryStr.length() == 1 ){	temporaryStr = "00"+temporaryStr;}
+						branchRankOutput.write(temporaryStr+","+branchTitle[f]+","+temporaryInt+"\r\n");
+						alreadyBranchWrite[f] = 1;
+					}
+				}
+			}
+			branchRankOutput.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+			for (int c= 0; c < commoditySales.length; c++){
+			if (commoditySales[c] == 0){continue;}
+			commoditySales[c] *= -1;
+			salesCommodityRank.add(commoditySales[c]);
+		}
+		Collections.sort(salesCommodityRank);
+		File commodityRank = new File(args[3]+"\\commodity.out");
+		try {
+			FileWriter commodityOutputStock = new FileWriter(commodityRank);
+			BufferedWriter commodityRankOutput = new BufferedWriter(commodityOutputStock);
+			for (int d = 0; d < salesCommodityRank.size(); d++){
+				for (int f = 0; f < commoditySales.length; f++){
+					int temporaryInt = salesCommodityRank.get(d);
+					if (commoditySales[f] == temporaryInt && alreadyCommodityWrite[f] == 0){
+						temporaryInt *= -1;
+						commodityRankOutput.write(commodityInfoNo[f]+","+commodityTitle[f]+","+temporaryInt+"\r\n");
+						alreadyCommodityWrite[f] = 1;
+					}
+				}
+			}
+			commodityRankOutput.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		System.out.println("正常にファイルを出力しました。\r\n処理を終了します。");
+		return;
 	}
+}
