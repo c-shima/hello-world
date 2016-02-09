@@ -22,7 +22,6 @@ public class Readfile {
 	 */
 
 
-	String dairistr = ("kamaboko\nninnkku\nsyouyu\nsoisousu");
 	public static void main(String[] args){
 
 		String temporaryStr; int errorMode = 0;
@@ -32,30 +31,29 @@ public class Readfile {
 		 */
 
 		System.out.println("指定されたファイルを探しています・・・");
-		File subshopDefine = new File(args[0]);
+		File branchDefine = new File(args[0]);
 
-		String[] subshopTitle = new String[999];
-		int[] subshopSales = new int[999];
+		String[] branchTitle = new String[999];
+		int[] branchSales = new int[999];
 
-		if(!subshopDefine.exists()){
+		if(!branchDefine.exists()){
 			System.out.println("支店定義ファイルが存在しません。");
 			System.out.println("処理を終了します。");
 			return;
 		}
 		try {
-			FileReader subshopReader = new FileReader(subshopDefine);
-			BufferedReader subshopStocker = new BufferedReader(subshopReader);
-			while((temporaryStr = subshopStocker.readLine())  != null) {
+			FileReader branchReader = new FileReader(branchDefine);
+			BufferedReader branchStocker = new BufferedReader(branchReader);
+			while((temporaryStr = branchStocker.readLine())  != null) {
 				String[] contType = temporaryStr.split("\\,");
 				if (contType.length > 2 || contType[0].length() != 3){
 					errorMode++;
 				}
-				int shopNo = Integer.parseInt(contType[0]);
-				subshopTitle[shopNo] = contType[1];
-				subshopSales[shopNo] = 0;
-				//System.out.println(ShopNo+":"+SubshopTitle[ShopNo]);
+				int branchNo = Integer.parseInt(contType[0]);
+				branchTitle[branchNo] = contType[1];
+				branchSales[branchNo] = 0;
 			}
-			subshopStocker.close();
+			branchStocker.close();
 			if (errorMode > 0) {
 				System.out.println("支店定義ファイルのフォーマットが不正です\r\n"
 					+ "処理を終了します。");
@@ -69,33 +67,32 @@ public class Readfile {
 		 *
 		 */
 
-		File goodsDefine = new File(args[1]);
+		File commodityDefine = new File(args[1]);
 
-		String[] goodsInfoNo = new String[999];
-		String[] goodsTitle = new String[999];
-		int[] goodsSales = new int[999];
+		String[] commodityInfoNo = new String[999];
+		String[] commodityTitle = new String[999];
+		int[] commoditySales = new int[999];
 
-		if(!goodsDefine.exists()){
+		if(!commodityDefine.exists()){
 			System.out.println("商品定義ファイルが存在しません。");
 			System.out.println("処理を終了します。");
 			return;
 		}
 		try {
-			FileReader goodsReader = new FileReader(goodsDefine);
-			BufferedReader goodsStocker = new BufferedReader(goodsReader);
+			FileReader commodityReader = new FileReader(commodityDefine);
+			BufferedReader commodityStocker = new BufferedReader(commodityReader);
 			int whileCnt = 0;
-			while((temporaryStr = goodsStocker.readLine())  != null) {
+			while((temporaryStr = commodityStocker.readLine())  != null) {
 				String[] contType = temporaryStr.split("\\,");
 				if (contType.length > 2 || contType[0].length() != 8){
 					errorMode ++;
 				}
-				goodsInfoNo[whileCnt] = contType[0];
-				goodsTitle[whileCnt] = contType[1];
-				goodsSales[whileCnt] = 0;
-				//System.out.println(whilecnt+":"+GoodsInfoNo[whilecnt]+","+GoodsTitle[whilecnt]);
+				commodityInfoNo[whileCnt] = contType[0];
+				commodityTitle[whileCnt] = contType[1];
+				commoditySales[whileCnt] = 0;
 				whileCnt++;
 			}
-			goodsStocker.close();
+			commodityStocker.close();
 			if (errorMode > 0) {
 				System.out.println("商品定義ファイルのフォーマットが不正です\r\n"
 					+ "処理を終了します。");
@@ -113,7 +110,6 @@ public class Readfile {
 		String[] salesDirList = salesDir.list();
 		ArrayList<String> salesFilesSort = new ArrayList<String>();
 		for (int a = 0; a < salesDirList.length; a++){
-			//System.out.println(SalesDirList[a]);
 			String[] fileType = salesDirList[a].split("\\.");
 			if (fileType.length > 0) {
 				if (fileType[1].endsWith("rcd")){
@@ -160,8 +156,8 @@ public class Readfile {
 			try {
 				int whileCnt = 0;
 				File salesDefine = new File(args[2]+"\\"+salesFilesSort.get(a));
-				FileReader salesShopCheck = new FileReader(salesDefine);
-				BufferedReader salesInfo = new BufferedReader(salesShopCheck);
+				FileReader salesBranchCheck = new FileReader(salesDefine);
+				BufferedReader salesInfo = new BufferedReader(salesBranchCheck);
 				while((temporaryStr = salesInfo.readLine()) != null){
 					if (whileCnt ==3 ) {
 						System.out.println(salesDefine+"のフォーマットが不正です。\r\n"
@@ -180,94 +176,92 @@ public class Readfile {
 					e.printStackTrace();
 				}
 			}
-			int nowShop = 0;
-			int nowGoods = 0;
+			int nowBranch = 0;
+			int nowCommodity = 0;
 				for (int i = 0; i < salesFilesSort.size(); i++){
 					/////////////////////////////////////////////////////////
-						nowShop = Integer.parseInt(temporaryDisposeStr[i][0]);
-						//System.out.println(NowShop);
-						if (subshopTitle[nowShop] == null) {
+						nowBranch = Integer.parseInt(temporaryDisposeStr[i][0]);
+						if (branchTitle[nowBranch] == null) {
 							System.out.println(temporaryDisposeStr[i][0] +"の支店コードが不正です。\r\n"
 									+ "処理を終了します。");
 							return;
 						}
 					////////////////////////////////////////////////////////////////
-						for (int b=0; b < goodsInfoNo.length; b++){
-							//System.out.println(GoodsInfoNo[b] +"="+ TemporaryDisposeStr[i][1]);
-							if (temporaryDisposeStr[i][1].equals(goodsInfoNo[b])){
-								nowGoods = b;
+						for (int b=0; b < commodityInfoNo.length; b++){
+							if (temporaryDisposeStr[i][1].equals(commodityInfoNo[b])){
+								nowCommodity = b;
 								break;
 							}
-							if (b+1 == goodsInfoNo.length ) {
+							if (b+1 == commodityInfoNo.length ) {
 								System.out.println(temporaryDisposeStr[i][1] +"の商品コードが不正です。\r\n"
 										+ "処理を終了します。");
 								return;
 							}
 						}
 					////////////////////////////////////////////////////////////////////
-						subshopSales[nowShop] += Integer.parseInt(temporaryDisposeStr[i][2]);
-						goodsSales[nowGoods] += Integer.parseInt(temporaryDisposeStr[i][2]);
+						branchSales[nowBranch] += Integer.parseInt(temporaryDisposeStr[i][2]);
+						commoditySales[nowCommodity] += Integer.parseInt(temporaryDisposeStr[i][2]);
 					////////////////////////////////////////////////////////////////////////
 				}
-			int[] alreadyShopWrite = new int[999]; // 0 == off , 1 == on
-			int[] alreadyGoodsWrite = new int[999]; // 0 == off , 1 == on
-			ArrayList<Integer> salesShopRank = new ArrayList<Integer>();
-			ArrayList<Integer> salesGoodsRank = new ArrayList<Integer>();
-			for (int c= 0; c < subshopSales.length; c++){
-				if (subshopSales[c] == 0){continue;}
-				if (subshopSales[c] > 999999999){
+			int[] alreadyBranchWrite = new int[999]; // 0 == off , 1 == on
+			int[] alreadyCommodityWrite = new int[999]; // 0 == off , 1 == on
+			ArrayList<Integer> salesBranchRank = new ArrayList<Integer>();
+			ArrayList<Integer> salesCommodityRank = new ArrayList<Integer>();
+			for (int c= 0; c < branchSales.length; c++){
+				if (branchSales[c] == 0){continue;}
+				if (branchSales[c] > 999999999){
 					System.out.println("合計金額が10桁を超えました\r\n"
 							+ "処理を終了します。");
 					return;
 				}
-				subshopSales[c] *= -1;
-				salesShopRank.add(subshopSales[c]);
+				branchSales[c] *= -1;
+				salesBranchRank.add(branchSales[c]);
 			}
-			Collections.sort(salesShopRank);
-			File shopRank = new File(args[3]+"\\branch.out");
+			Collections.sort(salesBranchRank);
+			File branchRank = new File(args[3]+"\\branch.out");
 			try {
-				FileWriter shopOutputStock = new FileWriter(shopRank);
-				BufferedWriter shopRankOutput = new BufferedWriter(shopOutputStock);
-				for (int d = 0; d < salesShopRank.size(); d++){
-					for (int f = 0; f < subshopSales.length; f++){
-						int temporaryInt = salesShopRank.get(d);
-						if (subshopSales[f] == temporaryInt && alreadyShopWrite[f] == 0){
+				FileWriter branchOutputStock = new FileWriter(branchRank);
+				BufferedWriter branchRankOutput = new BufferedWriter(branchOutputStock);
+				for (int d = 0; d < salesBranchRank.size(); d++){
+					for (int f = 0; f < branchSales.length; f++){
+						int temporaryInt = salesBranchRank.get(d);
+						if (branchSales[f] == temporaryInt && alreadyBranchWrite[f] == 0){
 							temporaryStr = String.valueOf(f);
 							temporaryInt *= -1;
 							if (temporaryStr.length() == 2 ){	temporaryStr = "0"+temporaryStr;}
 							if (temporaryStr.length() == 1 ){	temporaryStr = "00"+temporaryStr;}
-							shopRankOutput.write(temporaryStr+","+subshopTitle[f]+","+temporaryInt+"\r\n");
-							alreadyShopWrite[f] = 1;
+							branchRankOutput.write(temporaryStr+","+branchTitle[f]+","+temporaryInt+"\r\n");
+							alreadyBranchWrite[f] = 1;
 						}
 					}
 				}
-				shopRankOutput.close();
+				branchRankOutput.close();
 			} catch (IOException e) {
 				// TODO 自動生成された catch ブロック
 				e.printStackTrace();
 			}
 
-			for (int c= 0; c < goodsSales.length; c++){
-				if (goodsSales[c] == 0){continue;}
-				goodsSales[c] *= -1;
-				salesGoodsRank.add(goodsSales[c]);
+			for (int c= 0; c < commoditySales.length; c++){
+				if (commoditySales[c] == 0){continue;}
+				commoditySales[c] *= -1;
+				salesCommodityRank.add(commoditySales[c]);
 			}
-			Collections.sort(salesGoodsRank);
-			File goodsRank = new File(args[3]+"\\commodity.out");
+			Collections.sort(salesCommodityRank);
+			File commodityRank = new File(args[3]+"\\commodity.out");
 			try {
-				FileWriter goodsOutputStock = new FileWriter(goodsRank);
-				BufferedWriter goodsRankOutput = new BufferedWriter(goodsOutputStock);
-				for (int d = 0; d < salesGoodsRank.size(); d++){
-					for (int f = 0; f < goodsSales.length; f++){
-						int temporaryInt = salesGoodsRank.get(d);
-						if (goodsSales[f] == temporaryInt && alreadyGoodsWrite[f] == 0){
+				FileWriter commodityOutputStock = new FileWriter(commodityRank);
+				BufferedWriter commodityRankOutput = new BufferedWriter(commodityOutputStock);
+				for (int d = 0; d < salesCommodityRank.size(); d++){
+					for (int f = 0; f < commoditySales.length; f++){
+						int temporaryInt = salesCommodityRank.get(d);
+						if (commoditySales[f] == temporaryInt && alreadyCommodityWrite[f] == 0){
 							temporaryInt *= -1;
-							goodsRankOutput.write(goodsInfoNo[f]+","+goodsTitle[f]+","+temporaryInt+"\r\n");
-							alreadyGoodsWrite[f] = 1;
+							commodityRankOutput.write(commodityInfoNo[f]+","+commodityTitle[f]+","+temporaryInt+"\r\n");
+							alreadyCommodityWrite[f] = 1;
 						}
 					}
 				}
-				goodsRankOutput.close();
+				commodityRankOutput.close();
 			} catch (IOException e) {
 				// TODO 自動生成された catch ブロック
 				e.printStackTrace();
