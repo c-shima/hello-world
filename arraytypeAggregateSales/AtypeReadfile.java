@@ -15,87 +15,99 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 
-
 public class AtypeReadfile {
+static String temporaryStr; static int errorMode = 0;
+final static String[] errorMes = {"","ファイルが存在しません。","ファイルのフォーマットが不正です。",
+		"ファイル名が連番になっていません。" ,"のフォーマットが不正です。","コードが不正です。",
+		"合計金額が10桁を超えました。"};
+static AtypeReadfile readMethod = new AtypeReadfile();
 
-	/*コマンドライン引数
+	/*
+	 * コマンドライン引数
 	 * 「支店定義ファイルのディレクトリ 商品定義ファイルのディレクトリ (改行はしない)
 	 * 売上ファイルのディレクトリ(複数個所に入れている場合は一箇所にまとめていただく) 支店別集計ファイルの保存先
 	 * (改行はしない) 商品別集計ファイルの保存先」
 	 * を書いてください。
-	 *
 	 */
 
+	private HashMap<String, String> readData(String readfile , Integer effectiveDigit , Integer elements){
+		HashMap<String,String> readName = new HashMap<String,String>();
+		File readDefine = new File(readfile);
+		if(!readDefine.exists()){
+			errorMode = 1;
+			return null;
+		}
+		try {
+			FileReader readReader = new FileReader(readDefine);
+			BufferedReader readStocker = new BufferedReader(readReader);
+			while((temporaryStr = readStocker.readLine())  != null && errorMode == 0) {
+				String[] contType = temporaryStr.split("\\,");
+				if (contType.length > elements || contType[0].length() != effectiveDigit){
+					errorMode = 2;
+				}
+				readName.put(contType[0], contType[1]);
+			}
+			readStocker.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return readName;
+	}
+
+	private void outputFile(String fileName , HashMap<String,String> outputName , HashMap<String,Integer> outputSales){
+		List<Map.Entry<String,Integer>> Entries = new ArrayList<Map.Entry<String,Integer>>(outputSales.entrySet());
+		Collections.sort(Entries, new Comparator<Map.Entry<String,Integer>>() {
+			public int compare(Entry<String,Integer> entry1, Entry<String,Integer> entry2) {
+				return ((Integer)entry2.getValue()).compareTo((Integer)entry1.getValue());
+            	}
+        	});
+		File outputRank = new File(fileName);
+		try {
+			FileWriter OutputStock = new FileWriter(outputRank);
+			BufferedWriter RankOutput = new BufferedWriter(OutputStock);
+			for (Entry<String, Integer> s : Entries){
+				if (s.getValue() != 0){
+					RankOutput.write(s.getKey()+","+outputName.get(s.getKey())+","+s.getValue()+"\r\n");
+				}
+			}
+		RankOutput.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}	
 
 	public static void main(String[] args){
-		String temporaryStr; int errorMode = 0;
-		
-		/*支店定義ファイルの呼び出し
-		 *
+
+		/*
+		 * 支店定義ファイルの呼び出し
 		 */
-		System.out.println("指定されたファイルを探しています・・・");
 		HashMap<String,String> branchName = new HashMap<String,String>();
 		HashMap<String,Integer> branchSales = new HashMap<String,Integer>();
-		File branchDefine = new File(args[0]);
-		if(!branchDefine.exists()){
-			System.out.println("支店定義ファイルが存在しません。");
-			System.out.println("処理を終了します。");
-			return;
-		}
-		try {
-			FileReader branchReader = new FileReader(branchDefine);
-			BufferedReader branchStocker = new BufferedReader(branchReader);
-			while((temporaryStr = branchStocker.readLine())  != null) {
-				String[] contType = temporaryStr.split("\\,");
-				if (contType.length > 2 || contType[0].length() != 3){
-					errorMode++;
-				}
-				branchName.put(contType[0], contType[1]);
-				branchSales.put(contType[0],0);
-			}
-			branchStocker.close();
+		branchName = readMethod.readData(args[0]+File.separator+"branch.lst", 3 ,2);
 			if (errorMode > 0) {
-				System.out.println("支店定義ファイルのフォーマットが不正です\r\n処理を終了します。");
+				System.out.println("支店定義"+errorMes[errorMode]);
 				return;
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		/*商品ファイルの呼び出し
-		 *
+			for ( String h : branchName.keySet()){
+				branchSales.put(h, 0);
+			}
+		/*
+		 * 商品ファイルの呼び出し
 		 */
-
-		File commodityDefine = new File(args[1]);
-		HashMap<String,String> commodityName = new HashMap<String,String>();
-		HashMap<String,Integer> commoditySales = new HashMap<String,Integer>();
-		if(!commodityDefine.exists()){
-			System.out.println("商品定義ファイルが存在しません。\r\n処理を終了します。");
-			return;
-		}
-		try {
-			FileReader commodityReader = new FileReader(commodityDefine);
-			BufferedReader commodityStocker = new BufferedReader(commodityReader);
-			while((temporaryStr = commodityStocker.readLine())  != null) {
-				String[] contType = temporaryStr.split("\\,");
-				if (contType.length > 2 || contType[0].length() != 8){
-					errorMode ++;
-				}
-				commodityName.put(contType[0], contType[1]);
-				commoditySales.put(contType[0], 0);
-			}
-			commodityStocker.close();
+			HashMap<String,String> commodityName = new HashMap<String,String>();
+			HashMap<String,Integer> commoditySales = new HashMap<String,Integer>();
+			commodityName = readMethod.readData(args[1]+File.separator+"commodity.lst" , 8 , 2);
 			if (errorMode > 0) {
-				System.out.println("商品定義ファイルのフォーマットが不正です\r\n処理を終了します。");
+				System.out.println("商品定義"+errorMes[errorMode]);
 				return;
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		/*売上ファイルの呼び出し
-		 *
+			for ( String h : commodityName.keySet()){
+				commoditySales.put(h, 0);
+			}
+		/*
+		 * 売上ファイルの呼び出し
 		*/
+
 		File salesDir = new File(args[2]);
 		String[] salesDirList = salesDir.list();
 		ArrayList<String> salesFilesSort = new ArrayList<String>();
@@ -105,8 +117,7 @@ public class AtypeReadfile {
 			}
 		}
 		if (salesFilesSort.size() == 0) {
-			System.out.println("商品ファイルが存在しません。");
-			System.out.println("処理を終了します。");
+			System.out.println("売上"+errorMes[1]);
 			return;
 		}
 
@@ -123,49 +134,39 @@ public class AtypeReadfile {
 				if (nowNo == Integer.parseInt(fileSortNoCheck[0])){
 					nowNo++;
 				} else {
-					System.out.println("売上ファイル名が連番になっていません。\r\n処理を終了します。");
+					System.out.println("売上"+errorMes[3]);
 					return;
 				}
 			}
 		}
-		/*支店別集計
-		 *
+		/*
+		 * 支店別集計
 		 */
-
-		String [] temporaryDStr = new String[3];
+		String [] temporaryDStr = new String[4];
 		for (int i = 0; i < salesFilesSort.size(); i++){
 			try {
 				int whileCnt = 0;
 				File salesDefine = new File(args[2]+"\\"+salesFilesSort.get(i));
 				FileReader salesBranchCheck = new FileReader(salesDefine);
 				BufferedReader salesInfo = new BufferedReader(salesBranchCheck);
-				while((temporaryStr = salesInfo.readLine()) != null){
+				while((temporaryDStr[whileCnt] = salesInfo.readLine()) != null){
 					if (whileCnt ==3 ) {
-						System.out.println(salesDefine+"のフォーマットが不正です。\r\n処理を終了します。");
+						System.out.println(salesDefine+""+errorMes[4]);
 						return;
-					}
-					switch(whileCnt){
-					case 0:
-					case 1:
-						if (branchName.get(temporaryStr) == null && whileCnt == 0){
-							System.out.println( salesDefine+"の支店コードが不正です。\r\n処理を終了します。");
-							return;}
-						if (commodityName.get(temporaryStr) == null && whileCnt == 1 ){
-							System.out.println( salesDefine+"の商品コードが不正です。\r\n処理を終了します。");
-							return;	}
-						temporaryDStr[whileCnt] = temporaryStr;
-						break;
-					case 2:
-						branchSales.put( temporaryDStr[0] , branchSales.get(temporaryDStr[0]) + Integer.parseInt(temporaryStr));
-						commoditySales.put( temporaryDStr[1] , commoditySales.get(temporaryDStr[1]) + Integer.parseInt(temporaryStr));
-						if (branchSales.get(temporaryDStr[0]) > 999999999 || commoditySales.get(temporaryDStr[1]) > 999999999){
-							System.out.println("合計金額が10桁を超えました\r\n処理を終了します。");
-							return;
-						}
-						break;
 					}
 					whileCnt++;
 				}
+						if (branchName.get(temporaryDStr[0]) == null){
+							System.out.println( salesDefine+"の支店"+errorMes[5]);
+						}
+						if (commodityName.get(temporaryDStr[1]) == null) {
+							System.out.println( salesDefine+"の商品"+errorMes[5]);
+						}
+						branchSales.put( temporaryDStr[0] , branchSales.get(temporaryDStr[0]) + Integer.parseInt(temporaryDStr[2]));
+						commoditySales.put( temporaryDStr[1] , commoditySales.get(temporaryDStr[1]) + Integer.parseInt(temporaryDStr[2]));
+						if (branchSales.get(temporaryDStr[0]) > 999999999 || commoditySales.get(temporaryDStr[1]) > 999999999){
+							System.out.println(errorMes[6]);
+						}
 				if (i+1 == salesFilesSort.size() ){
 					salesInfo.close();
 				}
@@ -174,58 +175,13 @@ public class AtypeReadfile {
 				e.printStackTrace();
 			}
 		}
-
-
-		System.out.println("出力中・・・");
 		/*
 		 * 合計金額を降順にソート
-		 */
-
-		List<Map.Entry<String,Integer>> branchEntries = new ArrayList<Map.Entry<String,Integer>>(branchSales.entrySet());
-	    Collections.sort(branchEntries, new Comparator<Map.Entry<String,Integer>>() {
-	        public int compare(Entry<String,Integer> entry1, Entry<String,Integer> entry2) {
-	                return ((Integer)entry2.getValue()).compareTo((Integer)entry1.getValue());
-	            }
-	        });
-	    List<Map.Entry<String,Integer>> commodityEntries = new ArrayList<Map.Entry<String,Integer>>(commoditySales.entrySet());
-	    Collections.sort(commodityEntries, new Comparator<Map.Entry<String,Integer>>() {
-	        public int compare(Entry<String,Integer> entry1, Entry<String,Integer> entry2) {
-	                return ((Integer)entry2.getValue()).compareTo((Integer)entry1.getValue());
-	            }
-	        });
-
-	    /* branch.out に出力
+	     * branch.out に出力
 	     * commodity.out に出力
 	     */
-
-		File branchRank = new File(args[3]+"\\branch.out");
-		try {
-			FileWriter branchOutputStock = new FileWriter(branchRank);
-			BufferedWriter branchRankOutput = new BufferedWriter(branchOutputStock);
-			 for (Entry<String,Integer> s : branchEntries){
-				 if (s.getValue() != 0){
-					 branchRankOutput.write(s.getKey()+","+branchName.get(s.getKey())+","+s.getValue()+"\r\n");
-				 }
-			}
-			branchRankOutput.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		File commodityRank = new File(args[3]+"\\commodity.out");
-		try {
-			FileWriter commodityOutputStock = new FileWriter(commodityRank);
-			BufferedWriter commodityRankOutput = new BufferedWriter(commodityOutputStock);
-			for (Entry<String,Integer> s : commodityEntries){
-				if (s.getValue() != 0){
-					commodityRankOutput.write(s.getKey()+","+commodityName.get(s.getKey())+","+s.getValue()+"\r\n");
-				}
-			}
-			commodityRankOutput.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		System.out.println("正常にファイルを出力しました。\r\n処理を終了します。");
+		readMethod.outputFile(args[3]+"\\branch.out",branchName,branchSales);
+		readMethod.outputFile(args[4]+"\\commodity.out",commodityName,commoditySales);
 		return;
 	}
 }
-
